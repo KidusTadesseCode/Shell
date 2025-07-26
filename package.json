@@ -1,0 +1,19 @@
+{
+  "name": "shell-sum-tool",
+  "version": "1.0.0",
+  "description": "A simple CLI tool that calculates the sum of numbers.",
+  "main": "index.js",
+  "bin": {
+    "sum": "./index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cli",
+    "sum",
+    "calculator"
+  ],
+  "author": "",
+  "license": "ISC"
+}
