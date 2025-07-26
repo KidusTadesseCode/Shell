@@ -1,18 +1,21 @@
 {
-  "name": "shell-sum-tool",
+  "name": "shell-distribute-file-tool",
   "version": "1.0.0",
-  "description": "A simple CLI tool that calculates the sum of numbers.",
+  "description": "TBA",
   "main": "index.js",
+  "type": "module",
   "bin": {
-    "sum": "./index.js"
+    "distribute-files": "./index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "cli",
-    "sum",
-    "calculator"
+    "shell",
+    "distribute",
+    "file",
+    "tool"
   ],
   "author": "",
   "license": "ISC"
