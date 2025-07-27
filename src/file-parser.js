@@ -1,7 +1,6 @@
 // src/file-parser.js
 import { marked } from "marked";
 import fs from "fs";
-import { writeFile } from "./writeFile.js";
 
 // Define languages that are for file content
 const fileContentLangs = ["javascript", "js", "prisma", "json", "sql", "css"];
