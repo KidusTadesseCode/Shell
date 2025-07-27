@@ -19,7 +19,8 @@ const main = async () => {
   );
 
   try {
-    checkIfFileIsMarked(markdownPath);
+    const isMarked = checkIfFileIsMarked(markdownPath);
+    if (!isMarked) return;
     const { filesToDistribute, commandsToRun } = parseMarkdown(markdownPath);
     if (filesToDistribute.length > 0) {
       console.log(chalk.cyan("\n--- Distributing Files ---"));
