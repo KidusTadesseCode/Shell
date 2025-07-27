@@ -14,11 +14,22 @@ export function markMarkdownFile(filePath) {
   return;
 }
 
-export function checkIfFileIsMarked(filePath) {
+export async function checkIfFileIsMarked(filePath) {
   const content = fs.readFileSync(filePath, "utf8");
   const isMarked = content.split("\n")[0] === marker;
+
   if (isMarked) {
-    console.log(chalk.yellow(`File already marked: ${filePath}`));
-    console.log(chalk.yellow("Are you sure you want to parse again?"));
+    const { shouldParseAgain } = await inquirer.prompt([
+      {
+        type: "confirm",
+        name: "shouldParseAgain",
+        message: chalk.yellow(
+          "This file appears to have been processed already. Would you like to proceed with the distribution again?"
+        ),
+        default: false,
+      },
+    ]);
+    return shouldParseAgain;
   }
+  return true;
 }
