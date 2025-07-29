@@ -1,31 +1,37 @@
 #!/usr/bin/env node
-
+// index.js
 import { parseMarkdown } from "./src/file-parser.js";
 import { writeFiles } from "./src/file-writer.js";
 import { runCommands } from "./src/command-runner.js";
 import chalk from "chalk";
 import path from "path";
 import { markMarkdownFile, checkIfFileIsMarked } from "./src/file-mark.js";
-import { prismaCoder } from "./src/coder/prismaCoder.js";
-// const clear = "\x1Bc";
-// console.log(clear);
+import { prismaCoder } from "./src/libs/coder/prismaLibs/prismaCoder.js";
+import { diagnosis } from "./src/libs/diagnosis/diagnosis.js";
+const clear = "\x1Bc";
+console.log(clear);
+
+const markdownPath = path.join(
+  process.cwd(),
+  "Distribute",
+  "distributeFiles.md"
+);
 
 const main = async () => {
   console.log(chalk.blue.bold("--- Starting File Distribution ---"));
-  const markdownPath = path.join(
-    process.cwd(),
-    "Distribute",
-    "distributeFiles.md"
-  );
 
   try {
     const isMarked = await checkIfFileIsMarked(markdownPath);
-    console.log("isMarked: ", isMarked);
     if (!isMarked) return;
-    let { filesToDistribute, commandsToRun } = parseMarkdown(markdownPath);
+    const { filesToDistribute, commandsToRun } = parseMarkdown(markdownPath);
     if (filesToDistribute.length > 0) {
       console.log(chalk.cyan("\n--- Distributing Files ---"));
-      filesToDistribute = await prismaCoder(filesToDistribute);
+
+      const result = await prismaCoder(filesToDistribute, commandsToRun);
+      diagnosis("result", result);
+      // filesToDistribute = result.filesToDistribute;
+      // commandsToRun = result.commandsToRun;
+
       writeFiles(filesToDistribute);
     } else {
       console.log(chalk.yellow("No files to distribute."));
