@@ -1,13 +1,3 @@
-// test.js
-import { readFileSync, existsSync } from "fs";
-import { join } from "path";
-import prismaInternals from "@prisma/internals";
-// import { diagnosis } from "./diagnosis/diagnosis";
-import chalk from "chalk";
-const clear = "\x1Bc";
-const l = console.log;
-l(clear);
-
 /**
  * Deep-sanity-check that the incoming schema is a superset of the existing one.
  *
@@ -109,40 +99,4 @@ export function deepSanityCheck(existingDMMF, incomingDMMF) {
     isMissing: true,
     missing,
   };
-}
-
-export async function countPrismaParts(schema) {
-  const config = await prismaInternals.getConfig({
-    datamodel: schema,
-    ignoreEnvVarErrors: true,
-  });
-  const { datasources, generators } = config;
-
-  // models / enums
-  const DMMF = await prismaInternals.getDMMF({ datamodel: schema });
-  const { datamodel } = DMMF;
-  const { models, enums } = datamodel;
-
-  return {
-    datasources: datasources.length,
-    generators: generators.length,
-    models: models.length,
-    enums: enums.length,
-  };
-}
-
-export async function compareSchemas(existingSchemaPath, newSchemaPath) {
-  const existingSchemaCount = await countPrismaParts(existingSchemaPath);
-  const newSchemaCount = await countPrismaParts(newSchemaPath);
-  const schemaKeys = ["datasources", "generators", "models", "enums"];
-  const potentialErrors = [];
-  for (const key of schemaKeys) {
-    if (existingSchemaCount[key] > newSchemaCount[key])
-      potentialErrors.push({
-        schemaField: key,
-        existingSchema: existingSchemaCount[key],
-        incommingSchema: newSchemaCount[key],
-      });
-  }
-  return potentialErrors;
 }

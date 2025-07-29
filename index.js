@@ -7,7 +7,6 @@ import chalk from "chalk";
 import path from "path";
 import { markMarkdownFile, checkIfFileIsMarked } from "./src/file-mark.js";
 import { prismaCoder } from "./src/libs/coder/prismaLibs/prismaCoder.js";
-import { diagnosis } from "./src/libs/diagnosis/diagnosis.js";
 const clear = "\x1Bc";
 console.log(clear);
 
@@ -28,7 +27,6 @@ const main = async () => {
       console.log(chalk.cyan("\n--- Distributing Files ---"));
 
       const result = await prismaCoder(filesToDistribute, commandsToRun);
-      // diagnosis("result", result);
       filesToDistribute = result.filesToDistribute;
       commandsToRun = result.commandsToRun;
 
