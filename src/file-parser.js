@@ -1,11 +1,12 @@
 // src/file-parser.js
 import { marked } from "marked";
 import fs from "fs";
-
+import { prismaCoder } from "./libs/coder/prismaLibs/prismaCoder.js";
+import { styledComponentsCoder } from "./libs/coder/prismaLibs/styledComponents/styledComponentscoder.js";
 // Define languages that are for file content
 const fileContentLangs = ["javascript", "js", "prisma", "json", "sql", "css"];
 
-export const parseMarkdown = (filePath) => {
+export async function parseMarkdown(filePath) {
   const markdown = fs.readFileSync(filePath, "utf8");
   const tokens = marked.lexer(markdown, { gfm: true });
   const filesToDistribute = [];
@@ -35,6 +36,21 @@ export const parseMarkdown = (filePath) => {
             !potentialPath.includes(" ") &&
             (potentialPath.includes("/") || potentialPath.includes("."))
           ) {
+            if (lang === "javascript" || lang === "js") {
+              const check = ` from "styled-components"`;
+              const splitCode = code.split("\n");
+              const isStyled = splitCode.some((line) => line.includes(check));
+              if (isStyled) {
+                const checkStyledCode = await styledComponentsCoder(
+                  code,
+                  potentialPath
+                );
+                if (checkStyledCode === false) continue;
+                filesToDistribute.push({ filePath: potentialPath, code });
+                continue;
+              }
+            }
+
             filesToDistribute.push({ filePath: potentialPath, code });
             // Continue to the next token since we've processed this block
             continue;
@@ -47,5 +63,7 @@ export const parseMarkdown = (filePath) => {
       }
     }
   }
+
+  // const result = await prismaCoder(filesToDistribute, commandsToRun);
   return { filesToDistribute, commandsToRun };
-};
+}
