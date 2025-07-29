@@ -40,6 +40,7 @@ export async function styledComponentsCoder(code, potentialPath) {
   const currentCodeCount = getExportCount(currentCode);
   const incomingCodeCount = getExportCount(code);
   if (incomingCodeCount >= currentCodeCount) return true;
+  console.log(potentialPath);
   const { shouldContinue } = await inquirer.prompt([
     {
       type: "confirm",
