@@ -23,14 +23,14 @@ const main = async () => {
   try {
     const isMarked = await checkIfFileIsMarked(markdownPath);
     if (!isMarked) return;
-    const { filesToDistribute, commandsToRun } = parseMarkdown(markdownPath);
+    let { filesToDistribute, commandsToRun } = parseMarkdown(markdownPath);
     if (filesToDistribute.length > 0) {
       console.log(chalk.cyan("\n--- Distributing Files ---"));
 
       const result = await prismaCoder(filesToDistribute, commandsToRun);
-      diagnosis("result", result);
-      // filesToDistribute = result.filesToDistribute;
-      // commandsToRun = result.commandsToRun;
+      // diagnosis("result", result);
+      filesToDistribute = result.filesToDistribute;
+      commandsToRun = result.commandsToRun;
 
       writeFiles(filesToDistribute);
     } else {

@@ -80,31 +80,60 @@ export async function prismaCoder(files, commands) {
   );
 
   if (!prismaFile) {
-    // No prisma file to process, return original lists
     return { filesToDistribute: updatedFiles, commandsToRun: updatedCommands };
   }
 
   if (!existsSync(prismaFile.filePath)) {
-    // The prisma file does not exist yet, no need to compare
     return { filesToDistribute: updatedFiles, commandsToRun: updatedCommands };
   }
 
   const existingSchema = readFileSync(prismaFile.filePath, "utf8");
   const incommingSchema = prismaFile.code;
 
+  let incomingDMMF;
+  try {
+    incomingDMMF = await prismaInternals.getDMMF({
+      datamodel: incommingSchema,
+      previewFeatures: false,
+    });
+  } catch (error) {
+    console.log(chalk.red("\nError: The incoming Prisma schema is invalid."));
+    console.error(chalk.red(error.message));
+
+    const { shouldContinue } = await inquirer.prompt([
+      {
+        type: "confirm",
+        name: "shouldContinue",
+        message:
+          "Do you want to continue without the schema check and overwrite the existing schema?",
+        default: false,
+      },
+    ]);
+
+    if (!shouldContinue) {
+      console.log(
+        chalk.gray("-> Skipped Prisma schema update due to invalid schema.")
+      );
+
+      // console.log(updatedFiles);
+
+      updatedFiles = updatedFiles.filter(
+        (file) => !file.filePath === "prisma/schema.prisma"
+      );
+      updatedCommands = filterPrismaCommands(updatedCommands);
+    }
+
+    return { filesToDistribute: updatedFiles, commandsToRun: updatedCommands };
+  }
+
   const existingDMMF = await prismaInternals.getDMMF({
     datamodel: existingSchema,
-    previewFeatures: false,
-  });
-  const incomingDMMF = await prismaInternals.getDMMF({
-    datamodel: incommingSchema,
     previewFeatures: false,
   });
 
   const sanityCheck = deepSanityCheck(existingDMMF, incomingDMMF);
 
   if (sanityCheck.isMissing === false) {
-    // The new schema has more lines than the existing one, no need to compare
     return {
       filesToDistribute: updatedFiles,
       commandsToRun: updatedCommands,
@@ -114,7 +143,7 @@ export async function prismaCoder(files, commands) {
   displaySanityCheck(sanityCheck);
 
   console.log(
-    chalk.yellow(`Warning: The new Prisma schema has a discrepancy.`)
+    chalk.yellow(`\nWarning: The new Prisma schema has a discrepancy.`)
   );
 
   const { shouldOverwrite } = await inquirer.prompt([
@@ -128,11 +157,9 @@ export async function prismaCoder(files, commands) {
 
   if (!shouldOverwrite) {
     console.log(chalk.gray("-> Skipped Prisma schema update."));
-    // Remove the prisma file from the distribution list
     updatedFiles = updatedFiles.filter(
       (file) => !file.filePath.endsWith("schema.prisma")
     );
-    // Remove any prisma commands
     updatedCommands = filterPrismaCommands(updatedCommands);
   }
 
@@ -141,6 +168,80 @@ export async function prismaCoder(files, commands) {
     commandsToRun: updatedCommands,
   };
 }
+
+// export async function prismaCoder(files, commands) {
+//   let updatedFiles = [...files];
+//   let updatedCommands = [...commands];
+
+//   const prismaFile = updatedFiles.find((file) =>
+//     file.filePath.endsWith("schema.prisma")
+//   );
+
+//   if (!prismaFile) {
+//     // No prisma file to process, return original lists
+//     return { filesToDistribute: updatedFiles, commandsToRun: updatedCommands };
+//   }
+
+//   if (!existsSync(prismaFile.filePath)) {
+//     // The prisma file does not exist yet, no need to compare
+//     return { filesToDistribute: updatedFiles, commandsToRun: updatedCommands };
+//   }
+
+//   const existingSchema = readFileSync(prismaFile.filePath, "utf8");
+//   const incommingSchema = prismaFile.code;
+
+//   console.log("Getting DMMFs for existing schemas");
+//   const existingDMMF = await prismaInternals.getDMMF({
+//     datamodel: existingSchema,
+//     previewFeatures: false,
+//   });
+
+//   console.log("Getting DMMFs for incoming schemas");
+//   const incomingDMMF = await prismaInternals.getDMMF({
+//     datamodel: incommingSchema,
+//     previewFeatures: false,
+//   });
+
+//   const sanityCheck = deepSanityCheck(existingDMMF, incomingDMMF);
+
+//   if (sanityCheck.isMissing === false) {
+//     // The new schema has more lines than the existing one, no need to compare
+//     return {
+//       filesToDistribute: updatedFiles,
+//       commandsToRun: updatedCommands,
+//     };
+//   }
+
+//   displaySanityCheck(sanityCheck);
+
+//   console.log(
+//     chalk.yellow(`Warning: The new Prisma schema has a discrepancy.`)
+//   );
+
+//   const { shouldOverwrite } = await inquirer.prompt([
+//     {
+//       type: "confirm",
+//       name: "shouldOverwrite",
+//       message: "Are you sure you want to overwrite the existing schema?",
+//       default: false,
+//     },
+//   ]);
+
+//   if (!shouldOverwrite) {
+//     console.log(chalk.gray("-> Skipped Prisma schema update."));
+//     // Remove the prisma file from the distribution list
+//     updatedFiles = updatedFiles.filter(
+//       (file) => !file.filePath.endsWith("schema.prisma")
+//     );
+//     // Remove any prisma commands
+//     updatedCommands = filterPrismaCommands(updatedCommands);
+//   }
+
+//   return {
+//     filesToDistribute: updatedFiles,
+//     commandsToRun: updatedCommands,
+//   };
+// }
 
 // export async function prismaCoder(files, commands) {
 //   let updatedFiles = [...files];
