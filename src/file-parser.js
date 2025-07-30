@@ -5,6 +5,11 @@ import { prismaCoder } from "./libs/coder/prismaLibs/prismaCoder.js";
 import { styledComponentsCoder } from "./libs/coder/prismaLibs/styledComponents/styledComponentscoder.js";
 // Define languages that are for file content
 const fileContentLangs = ["javascript", "js", "prisma", "json", "sql", "css"];
+const blacklistFiles = [
+  "src/components/layout/AppHeader.js",
+  "src/components/auth/UserMenu.js",
+  "src/styles/theme.js",
+];
 
 export async function parseMarkdown(filePath) {
   const markdown = fs.readFileSync(filePath, "utf8");
@@ -36,6 +41,11 @@ export async function parseMarkdown(filePath) {
             !potentialPath.includes(" ") &&
             (potentialPath.includes("/") || potentialPath.includes("."))
           ) {
+            // Check if the file should be ignored
+            if (blacklistFiles.includes(potentialPath)) {
+              continue;
+            }
+
             if (lang === "javascript" || lang === "js") {
               const check = ` from "styled-components"`;
               const splitCode = code.split("\n");
