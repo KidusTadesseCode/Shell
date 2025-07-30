@@ -3,6 +3,9 @@ import { marked } from "marked";
 import fs from "fs";
 import { prismaCoder } from "./libs/coder/prismaLibs/prismaCoder.js";
 import { styledComponentsCoder } from "./libs/coder/prismaLibs/styledComponents/styledComponentscoder.js";
+import { jsLengthCheck } from "./libs/coder/prismaLibs/javascriptLengthCheck.js";
+import chalk from "chalk";
+
 // Define languages that are for file content
 const fileContentLangs = ["javascript", "js", "prisma", "json", "sql", "css"];
 const blacklistFiles = [
@@ -43,8 +46,12 @@ export async function parseMarkdown(filePath) {
           ) {
             // Check if the file should be ignored
             if (blacklistFiles.includes(potentialPath)) {
+              console.log(chalk.yellow(`Skipping ${potentialPath}`));
               continue;
             }
+
+            const linkCheck = await jsLengthCheck(code, potentialPath);
+            if (linkCheck === false) continue;
 
             if (lang === "javascript" || lang === "js") {
               const check = ` from "styled-components"`;
