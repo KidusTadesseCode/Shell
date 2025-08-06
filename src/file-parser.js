@@ -2,7 +2,7 @@
 import { marked } from "marked";
 import fs from "fs";
 import { prismaCoder } from "./libs/coder/prismaLibs/prismaCoder.js";
-import { styledComponentsCoder } from "./libs/coder/prismaLibs/styledComponents/styledComponentscoder.js";
+import { styledComponentsCoder } from "./libs/coder/prismaLibs/styledComponents/styledComponentsCoder.js";
 import { jsLengthCheck } from "./libs/coder/prismaLibs/javascriptLengthCheck.js";
 import chalk from "chalk";
 
